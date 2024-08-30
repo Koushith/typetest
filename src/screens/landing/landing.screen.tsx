@@ -5,12 +5,44 @@ import { Link } from "react-router-dom";
 import Modal from "../../components/modal/modal.component";
 import { useState } from "react";
 import { QRCode } from "react-qrcode-logo";
+import { Reclaim } from '@reclaimprotocol/js-sdk';
 
 export const LandingScreen = () => {
     const [isModalOpen, setModalOpen] = useState(false);
-
+const [statusUrl, setStatusUrl] = useState("");
+const [requestUrl, setRequestUrl] = useState("");
     const openModal = () => setModalOpen(true);
     const closeModal = () => setModalOpen(false);
+
+
+    const getVerificationReq = async () => {
+        const APP_ID = "0xA56e5c903856b2f365EAC54B5a322862EB1FBe93";
+        const reclaimClient = new Reclaim.ProofRequest(APP_ID);
+        const providerIds = [
+        '505ecfd5-c685-490c-af2f-1f46a313d580', // monkey speed
+        ];
+        await reclaimClient.buildProofRequest(providerIds[0])
+        const APP_SECRET ="0x89d84de3ff850b4ff583b3fe8415209c474f365abb35b26bc837b14edb828a71"  // your app secret key.
+        reclaimClient.setSignature(
+            await reclaimClient.generateSignature(APP_SECRET)
+        )
+        const { requestUrl, statusUrl } =
+          await reclaimClient.createVerificationRequest()
+          console.log('Request URL:', requestUrl)
+        setRequestUrl(requestUrl)
+        await reclaimClient.startSession({
+          onSuccessCallback: (proof: any) => {
+            console.log('Verification success', proof)
+            // Your business logic here
+          },
+          onFailureCallback: (error: any) => {
+            console.error('Verification failed', error)
+            // Your business logic here to handle the error
+          }
+        })
+    };
+
+
     return (
         <LeaderboardContainer>
             <div className="cta-section">
@@ -24,7 +56,10 @@ export const LandingScreen = () => {
                     Go To <br/> Monkeytype.Com
                 </a>
 
-                <button onClick={openModal} className="button reclaim-btn">
+                <button onClick={()=>{
+                    getVerificationReq()
+                    openModal()
+                }} className="button reclaim-btn">
                     Submit Your <br/> Speed!!
                 </button>
             </div>
@@ -41,10 +76,10 @@ export const LandingScreen = () => {
         onClose={closeModal}
         title="Submit Reclaim Proof"
         width="600px"
-      ><div style={{display:"flex", alignItems:"center", justifyContent:"center", flexDirection:'column'}}>
+      ><div style={{display:"flex", alignItems:"center", justifyContent:"center", flexDirection:'column', padding:20}}>
         
-        <QRCode
-              value={"qrCode"}
+       {requestUrl ?  <QRCode
+              value={requestUrl}
               size={256}
               fgColor="#2E2E2E"
               bgColor="#F5F5F5"
@@ -58,9 +93,8 @@ export const LandingScreen = () => {
               ]}
               qrStyle="dots"
               style={{ borderRadius: "10px" }}
-            />
-        <p>This is the content inside the modal. You can pass any React element here.</p>
-        <button onClick={closeModal}>Close Modal</button>
+            />: <h1>Generating QR Code...</h1>}
+      <p style={{marginTop:20}}>Waiting for the Proofs to be Submitted..</p>
       </div>
       </Modal>
         </LeaderboardContainer>
