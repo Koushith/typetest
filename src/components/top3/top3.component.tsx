@@ -37,7 +37,7 @@ const Top3Container = styled.main`
 display: flex;
 align-items: flex-end;
 /* justify-content: center; */
-z-index: 10;
+z-index: 30;
 
 
 .name{
