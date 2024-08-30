@@ -1,6 +1,7 @@
 import styled from "styled-components"
 import StartPattern from '../../assets/starts-pattern.png'
 import { Top3 } from "../../components"
+import { Link } from "react-router-dom"
 
 export const LandingScreen = () => {
     return (
@@ -14,9 +15,9 @@ your speed!!!</h1>
     Go To <br/> Monkeytype.Com
 </a>
 
-<a href="https://monkeytype.com" target="_next" className="button reclaim-btn">
+<Link to="/leaderboard" target="_next" className="button reclaim-btn">
     Submit Your <br/> Speed!!
-</a>
+</Link>
             </div>
             <div className="leader-board">
                 <div>
